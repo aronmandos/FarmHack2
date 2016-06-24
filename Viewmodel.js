@@ -3,22 +3,19 @@
  */
 
 
-var marker_array = ko.observableArray([]);
-var marker;
-var map;
-var circle;
-var location;
+// viewmodel
+var vm = function() {
+    self = this;
 
-function initialize() {
-    geocoder = new google.maps.Geocoder();
-    var mapOptions = {
+    self.POIs = ko.observableArray([]);
+    self.geocoder = new google.maps.Geocoder();
+    self.mapOptions = {
         center: { lat: 51.316207, lng: 5.181078},
         zoom: 16,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     };
-    map = new google.maps.Map(document.getElementById('map-canvas'),
-        mapOptions);
-    var rectangleCoords = [
+    self.map= new google.maps.Map(document.getElementById('map-canvas'), self.mapOptions);
+    self.field1 = [
         {lat: 51.318078, lng: 5.182258},
         {lat: 51.316804, lng: 5.178557},
         {lat: 51.316549, lng: 5.178772},
@@ -27,82 +24,134 @@ function initialize() {
         {lat: 51.315805, lng: 5.183771},
         {lat: 51.318078, lng: 5.182258}
     ];
-    var parcelRectangle = new google.maps.Polygon({
-        map: map,
-        paths: rectangleCoords,
-        strokeColor: '#FF0000 ',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor: '#FF0000 ',
-        fillOpacity: 0.35
-    });
-    parcelRectangle.setMap(map);
 
-    google.maps.event.addListener(parcelRectangle, 'click', function(e) {
-        if(google.maps.geometry.poly.containsLocation(e.latLng, parcelRectangle)){
+    self.init = function() {
+        console.debug("init", self.map, self.field1);
 
-            var icon = new google.maps.Marker({
-                position: e.latLng,
-                map: map,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    fillColor: 'blue',
-                    fillOpacity: .2,
-                    strokeColor: 'white',
-                    strokeWeight: .5,
-                    scale: 10
-                }
-            });
-            marker_array.push(icon)
+        self.addTractorToMap(self.map, {lat: 51.316804, lng: 5.178557}, 'Hello World');
+        var fields = [
+            self.addFieldToMap(self.map, self.field1)
+        ];
+        self.addFieldClickListeners(fields, self.map);
+
+        setInterval(self.moveDot, 1000/self.movesPerSecond);
+    };
+
+    self.addTractorToMap = function(map, location, name) {
+        "use strict";
+        self.tractor = new google.maps.Marker({
+            position: location,
+            map: map,
+            title: name
+        });
+    };
+
+    self.addFieldToMap = function(map, fieldPoly) {
+        "use strict";
+        var field = new google.maps.Polygon({
+            map: map,
+            paths: fieldPoly,
+            strokeColor: '#FF0000 ',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#FF0000 ',
+            fillOpacity: 0.35
+        });
+        field.setMap(map);
+        return field;
+    };
+
+    self.initMapClickListener = function(map, handlers) {
+        console.debug("initListener", map, handlers);
+        map.addListener('click', function(e) {
+            console.debug("mapclick", e, handlers);
+            for (i = 0; i < handlers.length; i++) {
+                handlers[i].function(map, e, handlers[i].data);
+            }
+        });
+
+    };
+    self.addFieldClickListeners = function(fields, map) {
+        "use strict";
+        for (var i = 0; i < fields.length; i++) {
+            self.addFieldClickListener(fields[i], [
+                {function: self.FieldClickHandler, data: {map: map}}
+            ]);
         }
-    });
-    marker = new google.maps.Marker({
-        position: {lat: 51.316804, lng: 5.178557},
-        map: map,
-        title: 'Hello World!'
-    });
-}
+    };
+    self.addFieldClickListener = function(field, handlers) {
+        "use strict";
+        console.debug("fieldListener", field, handlers);
+        field.addListener('click', function(e) {
+            console.debug("fieldclick1", e, handlers);
+            for (var i = 0; i < handlers.length; i++) {
+                handlers[i].function(field, e, handlers[i].data);
+            }
+        });
+    };
 
-google.maps.event.addDomListener(window, 'load');
+    self.FieldClickHandler = function(field, event, data) {
+        console.debug("fieldClick2", map, data);
+        "use strict";
+        var map = data.map;
+        if(self.pointInField(event.latLng, field)){
+            self.addPoiToMap(map, event.latLng);
+        }
+    };
+
+    self.addPoiToMap = function(map, point) {
+        "use strict";
+        self.POIs.push(new google.maps.Marker({
+            position: point,
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                fillColor: 'blue',
+                fillOpacity: .2,
+                strokeColor: 'white',
+                strokeWeight: .5,
+                scale: 10
+            }
+        }));
+    };
+    self.pointInField = function(point, field) {
+        "use strict";
+        return google.maps.geometry.poly.containsLocation(point, field);
+    };
 
 
-// Here's my data model
-var vm = function() {
-    self.polygon = [ [ 51.332536, 5.171928 ], [ 51.332891, 5.173665 ], [ 51.330090, 5.174586 ], [ 51.329875, 5.172955 ], [ 51.332536, 5.171928 ] ];
-    self.reflectOnPolygon = true;
-    self = this;
-    self.movesPerSecond = 2;
-    self.moveSpeed = 0.0002;
+    self.movesPerSecond = 4;
+    self.moveSpeed = 0.0001;
     self.dotX = ko.observable(5.178557);
     self.dotY = ko.observable(51.316804);
-    self.directionX = ko.observable(self.moveSpeed);
-    self.directionY = ko.observable(-1*(self.moveSpeed));
+    self.directionX = ko.observable(0);
+    self.directionY = ko.observable(0);
 
     console.debug(self.dotX());
 
     self.goright = function() {
-        self.directionX(self.moveSpeed)
-        self.directionY(0)
+        self.directionX(self.moveSpeed);
+        self.directionY(0);
     };
     self.goleft = function() {
-        self.directionX(-1*self.moveSpeed)
-        self.directionY(0)
+        self.directionX(-1*self.moveSpeed);
+        self.directionY(0);
     };
     self.goup = function() {
-        self.directionX(0)
-        self.directionY(self.moveSpeed)
+        self.directionX(0);
+        self.directionY(self.moveSpeed);
     };
     self.godown = function() {
-        self.directionX(0)
-        self.directionY(-1*self.moveSpeed)
+        self.directionX(0);
+        self.directionY(-1*self.moveSpeed);
     };
 
     self.marge= 0.00015;
 
     self.moveDot = function() {
-        for (i = 0; i < marker_array().length; i++) {
-            if(marker_array()[i].position.lng() > (self.dotX()-self.marge) && marker_array()[i].position.lng() < (self.dotX()+self.marge)){
-                if(marker_array()[i].position.lat() > (self.dotY()-self.marge) && marker_array()[i].position.lat() < (self.dotY()+self.marge)) {
+        for (i = 0; i < self.POIs().length; i++) {
+            if(self.POIs()[i].position.lng() > (self.dotX()-self.marge) && self.POIs()[i].position.lng() < (self.dotX()+self.marge)){
+                if(self.POIs()[i].position.lat() > (self.dotY()-self.marge) && self.POIs()[i].position.lat() < (self.dotY()+self.marge)) {
                     window.alert("Ik maak nu een foto! op veld 1.");
                 }
             }
@@ -110,11 +159,10 @@ var vm = function() {
         self.dotX(self.dotX() + self.directionX());
         self.dotY(self.dotY() + self.directionY());
         var newLatLng = new google.maps.LatLng(self.dotY(), self.dotX());
-        marker.setPosition(newLatLng);
-        console.debug("testmove");
-        console.debug(marker_array());
+        self.tractor.setPosition(newLatLng);
+        //console.debug("testmove", self.POIs());
     };
-    setInterval(self.moveDot, self.movesPerSecond*1000);
+
 
     self.inside = function(point, vs) {
         // ray-casting algorithm based on
@@ -134,6 +182,9 @@ var vm = function() {
 
         return inside;
     };
+    self.init();
+
 };
 
+google.maps.event.addDomListener(window, 'load');
 ko.applyBindings(new vm());

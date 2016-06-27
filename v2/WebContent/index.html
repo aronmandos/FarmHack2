@@ -1,0 +1,99 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="main.css">
+	<script type="text/javascript"
+			src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBc9ixDh4d1VkszWvjNv3NT_3PssMSYJ3M"></script>
+	<script type='text/javascript' src='knockout-3.4.0.js'></script>
+	<script type='text/javascript' src='https://code.jquery.com/jquery-3.0.0.min.js'></script>
+</head>
+<body onload="initPage()">
+<div style='display: table'>
+	<div id="simulationControl" >
+		<table>
+			<tr>
+				<td colspan='2' style='text-align: center; white-space: nowrap'>
+					<button onclick='location.reload()'>Restart</button>
+					<button data-bind="click: reset">Reset Route</button> <select
+						style='width: 100px' onchange='store.vehicle.draw(this.value)'>
+					<option value=''>[pick route]</option>
+					<option value='baseRoute'>base</option>
+					<option value='altRoute'>alternative</option>
+
+				</select>
+					<button data-bind="click: routeFollow">Follow Route</button>
+					<button onclick="$('#displayDetails').toggle()">Details</button>
+
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="detailsView" >
+		<div style=' display: table-cell;'></div>
+		<div id='displayDetails' style='display:none'>
+			<div id="displayDetailsLocation" >
+				car[lng(x),lat(y)]=<span data-bind="text: dotYview"></span>,<span data-bind="text: dotXview"></span>
+			</div>
+			<div id='displayMarkers' ></div>
+		</div>
+
+	</div>
+</div>
+<div id="map-canvas" ></div>
+<div>
+	<div id="directionControl" >
+		<table id='displayCarMoves' class='nomargin' >
+			<tr>
+				<td style='text-align: center; white-space: nowrap'><button
+						data-bind="click: goUpLeft">&#8598;</button></td>
+				<td>
+					<button data-bind="click: goup">&#8593;</button>
+				</td>
+				<td>
+
+					<button data-bind="click: goUpRight">&#8599;</button>
+				</td>
+			</tr>
+			<tr>
+				<td><button data-bind="click: goleft">&#8592;</button></td>
+				<td><img src='fourbyfour.png' /></td>
+				<td style='text-align: right'><button
+						data-bind="click: goright">&#8594;</button></td>
+			</tr>
+			<tr>
+				<td style='text-align: center; white-space: nowrap'><button
+						data-bind="click: goDownLeft">&#8601;</button></td>
+				<td>
+
+					<button  data-bind="click: godown">&#8595;</button>
+				</td>
+				<td>
+					<button data-bind="click: goDownRight">&#8600;</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="photoView" >
+		<table id='displayAlbum' class='nomargin'>
+			<tr>
+				<td style='text-align:center' colspan=5>
+					<select id='displayParcelPartNames' onchange='store.vehicle.photoFirst();return true;' >
+						<option value='51.318, 5.182' title='north_00.jpg'>North (51.3181, 5.1825)</option>
+						<option value='51.314, 5.178' title='south_00.jpg' selected>South (51.3137, 5.1775)</option>
+					</select>
+				</td></tr>
+			<tr>
+				<td><button data-bind="click: photoFirst">&#8666;</button></td>
+				<td><button data-bind="click: photoBackward">&#8592;</button></td>
+				<td><img id='displayImage' onclick='store.photoAlbum.toggle();'
+						 src='http://localhost/?open=D:/suite-demo/images_farm/fields_potatos/south/south_00.jpg'
+						 style='width: 100px; cursor:pointer; height: 50px'></td>
+				<td><button data-bind="click: photoForward">&#8594;</button></td>
+				<td><button data-bind="click: photoLast">&#8667;</button></td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<script type='text/javascript' src='Viewmodel.js'></script>
+</body>
+</html>

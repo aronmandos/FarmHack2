@@ -1,0 +1,53 @@
+#map-canvas {
+    height: 500px;
+    margin: 0;
+    padding: 0;
+    border: 5px solid;
+}
+#simulationControl {
+    display: table-cell;
+    width: 30%;
+}
+#directionControl {
+    display: table-cell;
+    border: 1px solid black;
+    vertical-align: top;
+}
+#detailsView {
+    width: 80%;
+    float: right;
+    display: table-cell;
+    white-space: nowrap;
+}
+#displayDetailsLocation {
+    display: inline;
+    border: 1px solid black;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+#displayMarkers {
+    padding-left: 20px;
+    padding-right: 20px;
+    display: inline;
+    border: 1px solid black;
+}
+#photoView {
+    display: table-cell;
+    border: 1px solid black;
+    vertical-align: top;
+}
+#displayCarMoves {
+    width: 90px;
+}
+#displayCarMoves button {
+    width:100%;
+    height:100%;
+}
+button {
+    min-height: 20px;
+}
+
+.nomargin button, .nomargin td {
+    padding: 0px;
+    margin: 0px;
+}

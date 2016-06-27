@@ -13,16 +13,16 @@
     <script type='text/javascript' src='knockout-3.4.0.js'></script>
 
 </head>
-<body onload="initialize()">
+<body>
 <div>
-    <p>x:<span id="span1" data-bind="text: dotX"> </span> y:<span data-bind="text: dotY"> </span></p>
+    <p>x:<span id="span1" data-bind="text: tractor.dotX"> </span> y:<span data-bind="text: tractor.dotY"> </span></p>
 </div>
 <div id="map-canvas" style ="border-style:solid;border-width: 5px;"></div>
 <div>
-    <button data-bind="click: goleft">Left <- </button>
-    <button data-bind="click: goright">Right -> </button>
-    <button data-bind="click: goup">Up ^ </button>
-    <button data-bind="click: godown">Down _ </button>
+    <button data-bind="click: tractor.goleft">Left <- </button>
+    <button data-bind="click: tractor.goright">Right -> </button>
+    <button data-bind="click: tractor.goup">Up ^ </button>
+    <button data-bind="click: tractor.godown">Down _ </button>
 </div>
 
 <script type='text/javascript' src='Viewmodel.js'></script>
